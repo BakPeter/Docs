@@ -1,0 +1,885 @@
+[
+    {
+        "id": "5b22aaed17ebd238",
+        "type": "tab",
+        "label": "Main",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b994b67d4ba2b291",
+        "type": "tab",
+        "label": "TEST1",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c50fc2f16f7b9461",
+        "type": "tab",
+        "label": "TEST2",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "42e3237bcf4a2385",
+        "type": "subflow",
+        "name": "Set tab status",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 50,
+                "y": 30,
+                "wires": [
+                    {
+                        "id": "4528446b165c3316"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 960,
+                "y": 340,
+                "wires": [
+                    {
+                        "id": "e3a581fe604c07c0",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [
+            {
+                "name": "flowName",
+                "type": "str",
+                "value": "",
+                "ui": {
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "str",
+                            "env"
+                        ]
+                    }
+                }
+            },
+            {
+                "name": "disableFlow",
+                "type": "bool",
+                "value": "true",
+                "ui": {
+                    "type": "input",
+                    "opts": {
+                        "types": [
+                            "bool",
+                            "env"
+                        ]
+                    }
+                }
+            }
+        ],
+        "meta": {},
+        "color": "#FDF0C2"
+    },
+    {
+        "id": "45ab55d003d1335d",
+        "type": "group",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "d324a311acc48f97",
+            "fb5989a94105f24b",
+            "7b0933d1f43996a0",
+            "ecd54626d2ad51c7",
+            "e8f9fdd2c7182792",
+            "df0a00dfaac63911"
+        ],
+        "x": 134,
+        "y": 939,
+        "w": 1252,
+        "h": 82
+    },
+    {
+        "id": "899df0ed2e2061a5",
+        "type": "http request",
+        "z": "42e3237bcf4a2385",
+        "name": "Get single flow",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:1880/flow/{{flowId}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 540,
+        "y": 220,
+        "wires": [
+            [
+                "ed03dbd1bba45c8c"
+            ]
+        ]
+    },
+    {
+        "id": "ed03dbd1bba45c8c",
+        "type": "change",
+        "z": "42e3237bcf4a2385",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.disabled",
+                "pt": "msg",
+                "to": "flowStatus",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 690,
+        "y": 280,
+        "wires": [
+            [
+                "e3a581fe604c07c0"
+            ]
+        ]
+    },
+    {
+        "id": "4528446b165c3316",
+        "type": "change",
+        "z": "42e3237bcf4a2385",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flowStatus",
+                "pt": "msg",
+                "to": "disableFlow",
+                "tot": "env"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 190,
+        "y": 80,
+        "wires": [
+            [
+                "3ec6dcfb7553a472"
+            ]
+        ]
+    },
+    {
+        "id": "3ec6dcfb7553a472",
+        "type": "http request",
+        "z": "42e3237bcf4a2385",
+        "name": "Get flows",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://localhost:1880/flows",
+        "tls": "",
+        "x": 240,
+        "y": 140,
+        "wires": [
+            [
+                "6ed484cd5c910b95"
+            ]
+        ]
+    },
+    {
+        "id": "6ed484cd5c910b95",
+        "type": "function",
+        "z": "42e3237bcf4a2385",
+        "name": "find tab in response",
+        "func": "msg.flowId = null;\n\nconst name = env.get(\"flowName\");\n\nmsg.payload.forEach(item => {\n    if(item.type === 'tab' && item.label === name) {\n        // node.warn(item);\n        msg.flowId = item.id;\n    } \n});\n\n// node.warn(msg);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 140,
+        "wires": [
+            [
+                "84f430f906d25d98"
+            ]
+        ]
+    },
+    {
+        "id": "e3a581fe604c07c0",
+        "type": "http request",
+        "z": "42e3237bcf4a2385",
+        "name": "Update flow",
+        "method": "PUT",
+        "ret": "obj",
+        "url": "http://localhost:1880/flow/{{payload.id}}",
+        "tls": "",
+        "x": 910,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "84f430f906d25d98",
+        "type": "switch",
+        "z": "42e3237bcf4a2385",
+        "name": "",
+        "property": "flowId",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 330,
+        "y": 260,
+        "wires": [
+            [
+                "899df0ed2e2061a5"
+            ],
+            [
+                "9434dfa70d7efda7"
+            ]
+        ]
+    },
+    {
+        "id": "9434dfa70d7efda7",
+        "type": "function",
+        "z": "42e3237bcf4a2385",
+        "name": "tab not found msg",
+        "func": "node.warn(\"tab not found\", msg);\n\nreturn msg;",
+        "outputs": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "0bfc1be022d374f9",
+        "type": "http request",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "localhost:1880/test1",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 390,
+        "y": 160,
+        "wires": [
+            [
+                "71a4c999319097ee",
+                "fd961de008856e7d",
+                "57c82da5082d3a55"
+            ]
+        ]
+    },
+    {
+        "id": "71a4c999319097ee",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "fd961de008856e7d",
+        "type": "join",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 650,
+        "y": 480,
+        "wires": [
+            [
+                "3e09785898acd716"
+            ]
+        ]
+    },
+    {
+        "id": "3e09785898acd716",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "62870e893a6e4678",
+        "type": "subflow:42e3237bcf4a2385",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "env": [
+            {
+                "name": "flowName",
+                "value": "TEST1",
+                "type": "str"
+            },
+            {
+                "name": "disableFlow",
+                "value": "false",
+                "type": "bool"
+            },
+            {
+                "name": "flowStatus",
+                "value": "false",
+                "type": "bool"
+            }
+        ],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "97707707c9b8df7e",
+                "0bfc1be022d374f9"
+            ]
+        ]
+    },
+    {
+        "id": "1d482c71bbe0450e",
+        "type": "inject",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "62870e893a6e4678"
+            ]
+        ]
+    },
+    {
+        "id": "97707707c9b8df7e",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b5ef272a32bd209c",
+        "type": "subflow:42e3237bcf4a2385",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "env": [
+            {
+                "name": "flowName",
+                "value": "TEST1",
+                "type": "str"
+            },
+            {
+                "name": "flowStatus",
+                "value": "false",
+                "type": "bool"
+            }
+        ],
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "902b9ca6b4c1ee22",
+                "57c82da5082d3a55"
+            ]
+        ]
+    },
+    {
+        "id": "902b9ca6b4c1ee22",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d324a311acc48f97",
+        "type": "http request",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "Get single flow",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://localhost:1880/flow/{{flowId}}",
+        "tls": "",
+        "x": 860,
+        "y": 980,
+        "wires": [
+            [
+                "fb5989a94105f24b"
+            ]
+        ]
+    },
+    {
+        "id": "fb5989a94105f24b",
+        "type": "change",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.disabled",
+                "pt": "msg",
+                "to": "flowStatus",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1070,
+        "y": 980,
+        "wires": [
+            [
+                "ecd54626d2ad51c7"
+            ]
+        ]
+    },
+    {
+        "id": "7b0933d1f43996a0",
+        "type": "change",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flowStatus",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 250,
+        "y": 980,
+        "wires": [
+            [
+                "e8f9fdd2c7182792"
+            ]
+        ]
+    },
+    {
+        "id": "ecd54626d2ad51c7",
+        "type": "http request",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "Update flow",
+        "method": "PUT",
+        "ret": "obj",
+        "url": "http://localhost:1880/flow/{{payload.id}}",
+        "tls": "",
+        "x": 1290,
+        "y": 980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e8f9fdd2c7182792",
+        "type": "http request",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "Get flows",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://localhost:1880/flows",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 440,
+        "y": 980,
+        "wires": [
+            [
+                "df0a00dfaac63911"
+            ]
+        ]
+    },
+    {
+        "id": "df0a00dfaac63911",
+        "type": "change",
+        "z": "5b22aaed17ebd238",
+        "g": "45ab55d003d1335d",
+        "name": "get flowId by name",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flowId",
+                "pt": "msg",
+                "to": "*[type = 'tab' and label = $$.topic].id",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 650,
+        "y": 980,
+        "wires": [
+            [
+                "d324a311acc48f97"
+            ]
+        ]
+    },
+    {
+        "id": "f00d66acbbf0866f",
+        "type": "http request",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "localhost:1880/test2",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 390,
+        "y": 360,
+        "wires": [
+            [
+                "c79c0bb7b17080de",
+                "73e178562d0a851b",
+                "8b825df9a5511ce7"
+            ]
+        ]
+    },
+    {
+        "id": "c79c0bb7b17080de",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "57c82da5082d3a55",
+        "type": "subflow:42e3237bcf4a2385",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "env": [
+            {
+                "name": "flowName",
+                "value": "TEST2",
+                "type": "str"
+            },
+            {
+                "name": "disableFlow",
+                "value": "false",
+                "type": "bool"
+            },
+            {
+                "name": "flowStatus",
+                "value": "false",
+                "type": "bool"
+            }
+        ],
+        "x": 360,
+        "y": 300,
+        "wires": [
+            [
+                "cee9a61bf82d85f1",
+                "f00d66acbbf0866f"
+            ]
+        ]
+    },
+    {
+        "id": "cee9a61bf82d85f1",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "73e178562d0a851b",
+        "type": "subflow:42e3237bcf4a2385",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "env": [
+            {
+                "name": "flowName",
+                "value": "TEST2",
+                "type": "str"
+            },
+            {
+                "name": "flowStatus",
+                "value": "false",
+                "type": "bool"
+            }
+        ],
+        "x": 360,
+        "y": 420,
+        "wires": [
+            [
+                "90fb2709939ec84e"
+            ]
+        ]
+    },
+    {
+        "id": "90fb2709939ec84e",
+        "type": "debug",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "8b825df9a5511ce7",
+        "type": "change",
+        "z": "5b22aaed17ebd238",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "complete",
+                "pt": "msg",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 480,
+        "wires": [
+            [
+                "fd961de008856e7d"
+            ]
+        ]
+    },
+    {
+        "id": "9f8ed1b08ee4a2e2",
+        "type": "http in",
+        "z": "b994b67d4ba2b291",
+        "name": "",
+        "url": "test1",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "a0f2ae58ca1a93bc"
+            ]
+        ]
+    },
+    {
+        "id": "a0f2ae58ca1a93bc",
+        "type": "change",
+        "z": "b994b67d4ba2b291",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.test",
+                "pt": "msg",
+                "to": "test1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "e5fd4e3243eed6fc"
+            ]
+        ]
+    },
+    {
+        "id": "e5fd4e3243eed6fc",
+        "type": "http response",
+        "z": "b994b67d4ba2b291",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "056301d360af612d",
+        "type": "http in",
+        "z": "c50fc2f16f7b9461",
+        "name": "",
+        "url": "test2",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 100,
+        "wires": [
+            [
+                "ee625638c1e3665c"
+            ]
+        ]
+    },
+    {
+        "id": "ee625638c1e3665c",
+        "type": "change",
+        "z": "c50fc2f16f7b9461",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.test",
+                "pt": "msg",
+                "to": "test2",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 380,
+        "y": 100,
+        "wires": [
+            [
+                "a8c6afd97b91c612"
+            ]
+        ]
+    },
+    {
+        "id": "a8c6afd97b91c612",
+        "type": "http response",
+        "z": "c50fc2f16f7b9461",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 590,
+        "y": 100,
+        "wires": []
+    }
+]
